@@ -3,7 +3,7 @@ package main
 import (
     "strings"
     "net/http"
-    "content-master/TubePorn"
+    "content-master/modules/TubePorn"
 )
 
 func perform(w http.ResponseWriter, r *http.Request) {
