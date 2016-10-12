@@ -35,6 +35,7 @@ func init() {
 }
 
 func perform(w http.ResponseWriter, r *http.Request) {
+    log.Println(r.URL.Path)
     w.Header().Set("Content-Type", "application/json")
 
     path := strings.Trim(r.URL.Path, "/")
