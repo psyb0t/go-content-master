@@ -135,6 +135,37 @@ func (p Performer) GetVideos(params []string) error {
         return p.OkVideosResponse("Videos fetched", videos)
     }
 
+    return p.GetCategory(params)
+}
+
+func (p Performer) GetCategory(params []string) error {
+    if len(params) < 3 {
+        return p.ErrorResponse("Invalid params")
+    }
+
+    number, err := strconv.Atoi(params[2])
+
+    if err != nil {
+        return p.ErrorResponse("Invalid number param")
+    }
+
+    offset := 0
+    if len(params) > 3 {
+        offset, err = strconv.Atoi(params[3])
+
+        if err != nil {
+            return p.ErrorResponse("Invalid number param")
+        }
+    }
+
+    category_seo_title := ""
+    if len(params) > 4 {
+        category_seo_title = params[4]
+    }
+
+    start_pos := offset
+    end_pos := start_pos + number - 1
+
     redis_get_res, err := p.Redis.Get(p.RKey(
         fmt.Sprintf("category:%s", category_seo_title))).Result()
 
