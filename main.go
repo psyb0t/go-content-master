@@ -20,11 +20,13 @@ var config *Config
 
 func init() {
     config = &Config{}
+    config.ListenHost = "127.0.0.1"
+    config.ListenPort = 60651
 
     file, err := ioutil.ReadFile("./config.json")
 
     if err != nil {
-        log.Fatal(err)
+        return
     }
 
     err = json.Unmarshal(file, &config)
