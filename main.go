@@ -8,7 +8,7 @@ import (
     "io/ioutil"
     "encoding/json"
 
-    "content-master/modules/TubePorn"
+    "go-content-master/modules/TubePorn"
 )
 
 type Config struct {
