@@ -1,10 +1,38 @@
 package main
 
 import (
+    "fmt"
     "strings"
+    "log"
     "net/http"
+    "io/ioutil"
+    "encoding/json"
+
     "content-master/modules/TubePorn"
 )
+
+type Config struct {
+    ListenHost string
+    ListenPort int
+}
+
+var config *Config
+
+func init() {
+    config = &Config{}
+
+    file, err := ioutil.ReadFile("./config.json")
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    err = json.Unmarshal(file, &config)
+
+    if err != nil {
+        log.Fatal(err)
+    }
+}
 
 func perform(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json")
@@ -18,17 +46,19 @@ func perform(w http.ResponseWriter, r *http.Request) {
 
     switch params[0] {
         case "tubeporn":
-            performer := &TubePorn.Performer{}
-            performer.KeyPrefix = "tubeporn"
-            performer.RespWriter = w
-            performer.Request = r
-            performer.Do(params)
+            performer := &TubePorn.Performer{
+                KeyPrefix: "tubeporn",
+                RespWriter: w,
+                Request: r,
+            }
 
+            performer.Do(params)
             break
     }
 }
 
 func main() {
     http.HandleFunc("/", perform)
-    http.ListenAndServe("127.0.0.1:8080", nil)
+    http.ListenAndServe(fmt.Sprintf("%s:%d", config.ListenHost,
+        config.ListenPort), nil)
 }

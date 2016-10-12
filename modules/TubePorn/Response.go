@@ -33,3 +33,20 @@ func (p Performer) OkVideosResponse(message string, data *Videos) error {
         Data: data,
     })
 }
+
+func (p Performer) OkCategoryResponse(message string, data *Category) error {
+    return json.NewEncoder(p.RespWriter).Encode(&CategoryResponse{
+        Status: "OK",
+        Message: message,
+        Data: data,
+    })
+}
+
+func (p Performer) OkCategoriesResponse(message string,
+  data *Categories) error {
+    return json.NewEncoder(p.RespWriter).Encode(&CategoriesResponse{
+        Status: "OK",
+        Message: message,
+        Data: data,
+    })
+}

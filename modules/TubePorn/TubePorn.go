@@ -33,6 +33,9 @@ func (p Performer) Do(params []string) error {
         case "fetchvideos":
             return p.GetVideos(params)
 
+        case "fetchcategories":
+            return p.GetCategories()
+
         default:
             return p.ErrorResponse("Invalid method")
     }
@@ -97,16 +100,62 @@ func (p Performer) GetVideos(data []string) error {
         }
     }
 
-    //category := ""
-    //if len(data) > 4 {
-    //    category = data[4]
-    //}
+    category_seo_title := ""
+    if len(data) > 4 {
+        category_seo_title = data[4]
+    }
 
     start_pos := offset
     end_pos := start_pos + number - 1
 
-    videos_raw, err := p.Redis.ZRevRange(p.RKey("videos"),
+    if category_seo_title == "" {
+        redis_res, err := p.Redis.ZRevRange(p.RKey("videos"),
                     int64(start_pos), int64(end_pos)).Result()
+
+        if err == redis.Nil {
+            return p.ErrorResponse("No videos found")
+        }
+
+        if err != nil {
+            return p.ErrorResponse("DB statement error")
+        }
+
+        videos := &Videos{}
+        for _, video_raw := range redis_res {
+            video := &Video{}
+            err = json.Unmarshal([]byte(video_raw), &video)
+
+            if err != nil {
+                continue
+            }
+
+            *videos = append(*videos, video)
+        }
+
+        return p.OkVideosResponse("Videos fetched", videos)
+    }
+
+    redis_get_res, err := p.Redis.Get(p.RKey(
+        fmt.Sprintf("category:%s", category_seo_title))).Result()
+
+    if err == redis.Nil {
+        return p.ErrorResponse("Category does not exist")
+    }
+
+    if err != nil {
+        return p.ErrorResponse("DB statement error")
+    }
+
+    category := &Category{SeoTitle: category_seo_title}
+    err = json.Unmarshal([]byte(redis_get_res), &category)
+
+    if err != nil {
+        return p.ErrorResponse("Error decoding category")
+    }
+
+    redis_zrevrange_res, err := p.Redis.ZRevRange(p.RKey(
+                fmt.Sprintf("category:%s:videos", category_seo_title)),
+                int64(start_pos), int64(end_pos)).Result()
 
     if err == redis.Nil {
         return p.ErrorResponse("No videos found")
@@ -116,8 +165,7 @@ func (p Performer) GetVideos(data []string) error {
         return p.ErrorResponse("DB statement error")
     }
 
-    videos := &Videos{}
-    for _, video_raw := range videos_raw {
+    for _, video_raw := range redis_zrevrange_res {
         video := &Video{}
         err = json.Unmarshal([]byte(video_raw), &video)
 
@@ -125,8 +173,34 @@ func (p Performer) GetVideos(data []string) error {
             continue
         }
 
-        *videos = append(*videos, video)
+        category.Videos = append(category.Videos, video)
     }
 
-    return p.OkVideosResponse("Videos fetched", videos)
+    return p.OkCategoryResponse("Category fetched", category)
+}
+
+func (p Performer) GetCategories() error {
+    redis_resp, err := p.Redis.ZRevRange(p.RKey("categories"), 0, -1).Result()
+
+    if err == redis.Nil {
+        return p.ErrorResponse("No videos found")
+    }
+
+    if err != nil {
+        return p.ErrorResponse("DB statement error")
+    }
+
+    categories := &Categories{}
+    for _, category_raw := range redis_resp {
+        category := &Category{}
+        err = json.Unmarshal([]byte(category_raw), &category)
+
+        if err != nil {
+            continue
+        }
+
+        *categories = append(*categories, category)
+    }
+
+    return p.OkCategoriesResponse("Categories fetched", categories)
 }
