@@ -76,24 +76,24 @@ func (p Performer) GetVideo(params []string) error {
     return p.OkVideoResponse("Video fetched", video)
 }
 
-func (p Performer) AddVideo(data []string) error {
+func (p Performer) AddVideo(params []string) error {
     return p.OkResponse("Added Video")
 }
 
-func (p Performer) GetVideos(data []string) error {
-    if len(data) < 3 {
+func (p Performer) GetVideos(params []string) error {
+    if len(params) < 3 {
         return p.ErrorResponse("Invalid params")
     }
 
-    number, err := strconv.Atoi(data[2])
+    number, err := strconv.Atoi(params[2])
 
     if err != nil {
         return p.ErrorResponse("Invalid number param")
     }
 
     offset := 0
-    if len(data) > 3 {
-        offset, err = strconv.Atoi(data[3])
+    if len(params) > 3 {
+        offset, err = strconv.Atoi(params[3])
 
         if err != nil {
             return p.ErrorResponse("Invalid number param")
@@ -101,8 +101,8 @@ func (p Performer) GetVideos(data []string) error {
     }
 
     category_seo_title := ""
-    if len(data) > 4 {
-        category_seo_title = data[4]
+    if len(params) > 4 {
+        category_seo_title = params[4]
     }
 
     start_pos := offset
