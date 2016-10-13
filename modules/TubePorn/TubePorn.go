@@ -34,6 +34,9 @@ func (p Performer) Do(params []string) error {
         case "videos":
             return p.GetVideos(params)
 
+        case "category":
+            return p.GetCategory(params)
+
         case "categories":
             return p.GetCategories()
 
@@ -95,52 +98,44 @@ func (p Performer) GetVideos(params []string) error {
         }
     }
 
-    category_seo_title := ""
-    if len(params) > 4 {
-        category_seo_title = params[4]
-    }
-
     start_pos := offset
     end_pos := start_pos + number - 1
 
-    if category_seo_title == "" {
-        videos, error := p.DbGetVideos(start_pos, end_pos)
+    videos, error := p.DbGetVideos(start_pos, end_pos)
 
-        if error != nil {
-            return p.ErrorResponse("Could not get videos")
-        }
-
-        return p.OkVideosResponse("Videos fetched", videos)
+    if error != nil {
+        return p.ErrorResponse("Could not get videos")
     }
 
-    return p.GetCategory(params)
+    return p.OkVideosResponse("Videos fetched", videos)
 }
 
 func (p Performer) GetCategory(params []string) error {
+    var err error
+
     if len(params) < 3 {
         return p.ErrorResponse("Invalid params")
     }
 
-    number, err := strconv.Atoi(params[2])
+    seo_title := params[2]
 
-    if err != nil {
-        return p.ErrorResponse("Invalid number param")
-    }
-
-    offset := 0
+    number := 50
     if len(params) > 3 {
-        offset, err = strconv.Atoi(params[3])
+        number, err = strconv.Atoi(params[3])
 
         if err != nil {
             return p.ErrorResponse("Invalid number param")
         }
     }
 
-    if len(params) < 4 {
-        return p.ErrorResponse("Category not specified")
-    }
+    offset := 0
+    if len(params) > 4 {
+        offset, err = strconv.Atoi(params[4])
 
-    seo_title := params[4]
+        if err != nil {
+            return p.ErrorResponse("Invalid number param")
+        }
+    }
 
     start_pos := offset
     end_pos := start_pos + number - 1
@@ -170,19 +165,36 @@ func (p Performer) GetCategories() error {
 }
 
 func (p Performer) GetVideoSearch(params []string) error {
+    var err error
+
     if len(params) < 3 {
         return p.ErrorResponse("Invalid params")
     }
 
-    number, err := strconv.Atoi(params[2])
+    kword := strings.Replace(params[2], " ", "-", -1)
 
-    if err != nil {
-        return p.ErrorResponse("Invalid number param")
+    r, _ := regexp.Compile("[^0-9a-z-]")
+    kword = r.ReplaceAllString(kword, "")
+
+    r, _ = regexp.Compile("([-]+)")
+    kword = r.ReplaceAllString(kword, "-")
+
+    if len(kword) < 2 {
+        return p.ErrorResponse("Invalid keyword length")
+    }
+
+    number := 50
+    if len(params) > 3 {
+        number, err = strconv.Atoi(params[3])
+
+        if err != nil {
+            return p.ErrorResponse("Invalid number param")
+        }
     }
 
     offset := 0
-    if len(params) > 3 {
-        offset, err = strconv.Atoi(params[3])
+    if len(params) > 4 {
+        offset, err = strconv.Atoi(params[4])
 
         if err != nil {
             return p.ErrorResponse("Invalid number param")
@@ -191,18 +203,6 @@ func (p Performer) GetVideoSearch(params []string) error {
 
     start_pos := offset
     end_pos := start_pos + number
-
-    if len(params) < 4 {
-        return p.ErrorResponse("Search keyword not provided")
-    }
-
-    kword := strings.Replace(params[4], " ", "-", -1)
-
-    r, _ := regexp.Compile("[^0-9a-z-]")
-    kword = r.ReplaceAllString(kword, "")
-
-    r, _ = regexp.Compile("([-]+)")
-    kword = r.ReplaceAllString(kword, "-")
 
     videos, err := p.DbGetVideoSearch(kword, start_pos, end_pos)
 
