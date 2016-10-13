@@ -46,6 +46,10 @@ func (v Videos) Length() int {
 func (v Videos) Rand() *Video {
     return v[rand.Intn(len(v))]
 }
+func (v Videos) Range(start int, end int) *Videos {
+    range_videos := v[start:end]
+    return &range_videos
+}
 
 type Response struct {
     Status string `json:"status"`

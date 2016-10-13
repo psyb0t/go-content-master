@@ -29,7 +29,7 @@ func (p Performer) DbGetVideo(seo_title string) (*Video, error) {
 
 func (p Performer) DbGetVideos(start_pos int, end_pos int) (*Videos, error) {
     redis_res, err := p.Redis.ZRevRange(p.RKey("videos"),
-                int64(start_pos), int64(end_pos)).Result()
+        int64(start_pos), int64(end_pos)).Result()
 
     if err != nil {
         if err != redis.Nil {
@@ -122,4 +122,39 @@ func (p Performer) DbGetCategories() (*Categories, error) {
     }
 
     return categories, nil
+}
+
+func (p Performer) DbGetVideoSearch(kword string, start_pos int,
+  end_pos int) (*Videos, error) {
+    redis_res, err := p.Redis.Keys(p.RKey(
+        fmt.Sprintf("video:*%s*", kword))).Result()
+
+    if err != nil {
+        if err != redis.Nil {
+            return nil, err
+        }
+    }
+
+    videos := &Videos{}
+    for _, video_key := range redis_res {
+        video := &Video{}
+
+        video_raw, err := p.Redis.Get(video_key).Result()
+
+        if err != nil {
+            if err != redis.Nil {
+                return nil, err
+            }
+        }
+
+        err = json.Unmarshal([]byte(video_raw), &video)
+
+        if err != nil {
+            continue
+        }
+
+        *videos = append(*videos, video)
+    }
+
+    return videos.Range(start_pos, end_pos), nil
 }
