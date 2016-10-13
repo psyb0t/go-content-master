@@ -22,8 +22,6 @@ func (p Performer) Do(params []string) error {
 
     request_method := string(p.Request.Method)
     switch params[1] {
-        case "fetchvideo":
-            fallthrough
         case "video":
             if request_method == "GET" {
                 return p.GetVideo(params)
@@ -33,21 +31,15 @@ func (p Performer) Do(params []string) error {
                 return p.AddVideo(params)
             }
 
-        case "fetchvideos":
-            fallthrough
         case "videos":
             return p.GetVideos(params)
 
-        case "fetchcategories":
-            fallthrough
         case "categories":
             return p.GetCategories()
 
         case "random-video":
             return p.GetRandomVideo()
 
-        case "searchvideos":
-            fallthrough
         case "search-video":
             return p.GetVideoSearch(params)
 
