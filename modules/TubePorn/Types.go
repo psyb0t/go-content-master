@@ -2,6 +2,7 @@ package TubePorn
 
 import (
     "net/http"
+    "math/rand"
     "gopkg.in/redis.v4"
 )
 
@@ -33,6 +34,12 @@ type Video struct {
 }
 
 type Videos []*Video
+func (v Videos) Length() int {
+    return len(v)
+}
+func (v Videos) Rand() *Video {
+    return v[rand.Intn(len(v))]
+}
 
 type Response struct {
     Status string `json:"status"`

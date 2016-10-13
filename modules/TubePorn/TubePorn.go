@@ -36,6 +36,9 @@ func (p Performer) Do(params []string) error {
         case "fetchcategories":
             return p.GetCategories()
 
+        case "randomvideo":
+            return p.RandomVideo()
+
         default:
             return p.ErrorResponse("Invalid method")
     }
@@ -109,27 +112,10 @@ func (p Performer) GetVideos(params []string) error {
     end_pos := start_pos + number - 1
 
     if category_seo_title == "" {
-        redis_res, err := p.Redis.ZRevRange(p.RKey("videos"),
-                    int64(start_pos), int64(end_pos)).Result()
+        videos, error := p.DbGetVideos(start_pos, end_pos)
 
-        if err == redis.Nil {
-            return p.ErrorResponse("No videos found")
-        }
-
-        if err != nil {
-            return p.ErrorResponse("DB statement error")
-        }
-
-        videos := &Videos{}
-        for _, video_raw := range redis_res {
-            video := &Video{}
-            err = json.Unmarshal([]byte(video_raw), &video)
-
-            if err != nil {
-                continue
-            }
-
-            *videos = append(*videos, video)
+        if error != nil {
+            return p.ErrorResponse("Could not get videos")
         }
 
         return p.OkVideosResponse("Videos fetched", videos)
@@ -234,4 +220,14 @@ func (p Performer) GetCategories() error {
     }
 
     return p.OkCategoriesResponse("Categories fetched", categories)
+}
+
+func (p Performer) RandomVideo() error {
+    videos, err := p.DbGetVideos(0, 20)
+
+    if err != nil {
+        return p.ErrorResponse("Could not fetch a random video")
+    }
+
+    return p.OkVideoResponse("Random video fetched", videos.Rand())
 }
