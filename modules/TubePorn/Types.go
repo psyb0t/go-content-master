@@ -20,6 +20,12 @@ type Category struct {
 }
 
 type Categories []*Category
+func (c Categories) Length() int {
+    return len(c)
+}
+func (c Categories) Rand() *Category {
+    return c[rand.Intn(len(c))]
+}
 
 type Video struct {
     Id string `json:"id"`
