@@ -57,7 +57,7 @@ func (p Performer) GetVideo(params []string) error {
 
     seo_title := params[2]
 
-    video, err := p.DbGetVideo(&seo_title)
+    video, err := p.DbGetVideo(seo_title)
 
     if err != nil {
         return p.ErrorResponse("Could not get video")
@@ -139,7 +139,7 @@ func (p Performer) GetCategory(params []string) error {
     start_pos := offset
     end_pos := start_pos + number - 1
 
-    category, err := p.DbGetCategory(&seo_title)
+    category, err := p.DbGetCategory(seo_title)
 
     if err != nil {
         fmt.Println(category)
@@ -148,7 +148,7 @@ func (p Performer) GetCategory(params []string) error {
     }
 
     category_videos, _ := p.DbGetCategoryVideos(
-        &seo_title, start_pos, end_pos)
+        seo_title, start_pos, end_pos)
 
     category.Videos = *category_videos
 
