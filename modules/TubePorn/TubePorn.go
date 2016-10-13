@@ -142,6 +142,8 @@ func (p Performer) GetCategory(params []string) error {
     category, err := p.DbGetCategory(&seo_title)
 
     if err != nil {
+        fmt.Println(category)
+        fmt.Println(err)
         return p.ErrorResponse("Could not get category")
     }
 
