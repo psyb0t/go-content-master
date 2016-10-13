@@ -1,39 +1,21 @@
 package main
 
 import (
+    "os"
+    "io"
     "fmt"
-    "strings"
     "log"
+    "strings"
     "net/http"
-    "io/ioutil"
-    "encoding/json"
 
     "go-content-master/modules/TubePorn"
 )
 
-type Config struct {
-    ListenHost string
-    ListenPort int
-}
-
-var config *Config
-
 func init() {
-    config = &Config{}
-    config.ListenHost = "127.0.0.1"
-    config.ListenPort = 60651
+    config = nil
+    SetupConfig()
 
-    file, err := ioutil.ReadFile("./config.json")
-
-    if err != nil {
-        return
-    }
-
-    err = json.Unmarshal(file, &config)
-
-    if err != nil {
-        log.Fatal(err)
-    }
+    log.SetOutput(io.MultiWriter(os.Stdout, OpenLogFile()))
 }
 
 func perform(w http.ResponseWriter, r *http.Request) {
