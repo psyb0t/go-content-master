@@ -58,6 +58,11 @@ func (v Videos) Range(start int, end int) *Videos {
     range_videos := v[start:end]
     return &range_videos
 }
+func (v Videos) AppendVideo(video *Video) *Videos {
+    v = append(v, video)
+
+    return &v
+}
 
 type Response struct {
     Status string `json:"status"`

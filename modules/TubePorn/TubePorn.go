@@ -70,7 +70,7 @@ func (p Performer) GetVideo(params []string) error {
 
     seo_title := params[2]
 
-    video, err := p.DbGetVideo(seo_title)
+    video, err := p.DbGetVideo(seo_title, true)
 
     if err != nil {
         return p.ErrorResponse("Could not get video")

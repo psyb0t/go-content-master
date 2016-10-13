@@ -7,7 +7,7 @@ import (
     "gopkg.in/redis.v4"
 )
 
-func (p Performer) DbGetVideo(seo_title string) (*Video, error) {
+func (p Performer) DbGetVideo(seo_title string, get_related bool) (*Video, error) {
     redis_key := p.RKey(fmt.Sprintf("video:%s", seo_title))
     redis_res, err := p.Redis.Get(redis_key).Result()
 
@@ -22,6 +22,19 @@ func (p Performer) DbGetVideo(seo_title string) (*Video, error) {
 
     if err != nil {
         return nil, err
+    }
+
+    if get_related {
+        for _, category := range video.Categories {
+            category_videos, err := p.DbGetCategoryVideos(
+                category.SeoTitle, 0, 10)
+
+            if err != nil {
+                continue
+            }
+
+            category.Videos = *category_videos
+        }
     }
 
     return video, nil
