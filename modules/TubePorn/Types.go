@@ -47,6 +47,14 @@ func (v Videos) Rand() *Video {
     return v[rand.Intn(len(v))]
 }
 func (v Videos) Range(start int, end int) *Videos {
+    if v.Length() < start {
+        start = v.Length()
+    }
+
+    if v.Length() < end {
+        end = v.Length()
+    }
+
     range_videos := v[start:end]
     return &range_videos
 }

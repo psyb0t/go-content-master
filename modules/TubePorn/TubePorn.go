@@ -3,6 +3,8 @@ package TubePorn
 import (
     "fmt"
     "strconv"
+    "regexp"
+    "strings"
 
     "gopkg.in/redis.v4"
 )
@@ -202,7 +204,13 @@ func (p Performer) GetVideoSearch(params []string) error {
         return p.ErrorResponse("Search keyword not provided")
     }
 
-    kword := params[4]
+    kword := strings.Replace(params[4], " ", "-", -1)
+
+    r, _ := regexp.Compile("[^0-9a-z-]")
+    kword = r.ReplaceAllString(kword, "")
+
+    r, _ = regexp.Compile("([-]+)")
+    kword = r.ReplaceAllString(kword, "-")
 
     videos, err := p.DbGetVideoSearch(kword, start_pos, end_pos)
 
