@@ -43,12 +43,12 @@ func (p Performer) Do(params []string) error {
         case "categories":
             return p.GetCategories()
 
-        case "randomvideo":
+        case "random-video":
             return p.GetRandomVideo()
 
         case "searchvideos":
             fallthrough
-        case "videosearch":
+        case "search-video":
             return p.GetVideoSearch(params)
 
         default:
