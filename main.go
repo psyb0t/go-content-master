@@ -8,7 +8,7 @@ import (
     "strings"
     "net/http"
 
-    "go-content-master/modules/TubePorn"
+    "go-content-master/performers/TubePorn"
 )
 
 func init() {
