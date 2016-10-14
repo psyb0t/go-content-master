@@ -70,25 +70,21 @@ type Response struct {
 }
 
 type VideoResponse struct {
-    Status string `json:"status"`
-    Message string `json:"message"`
+    Response
     Data *Video `json:"data"`
 }
 
 type VideosResponse struct {
-    Status string `json:"status"`
-    Message string `json:"message"`
+    Response
     Data *Videos `json:"data"`
 }
 
 type CategoryResponse struct {
-    Status string `json:"status"`
-    Message string `json:"message"`
+    Response
     Data *Category `json:"data"`
 }
 
 type CategoriesResponse struct {
-    Status string `json:"status"`
-    Message string `json:"message"`
+    Response
     Data *Categories `json:"data"`
 }

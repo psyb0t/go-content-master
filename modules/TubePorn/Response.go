@@ -5,48 +5,54 @@ import (
 )
 
 func (p Performer) ErrorResponse(message string) error {
-    return json.NewEncoder(p.RespWriter).Encode(&Response{
-        Status: "ERROR",
-        Message: message,
-    })
+    response := &Response{}
+    response.Status = "ERROR"
+    response.Message = message
+
+    return json.NewEncoder(p.RespWriter).Encode(response)
 }
 
 func (p Performer) OkResponse(message string) error {
-    return json.NewEncoder(p.RespWriter).Encode(&Response{
-        Status: "OK",
-        Message: message,
-    })
+    response := &Response{}
+    response.Status = "OK"
+    response.Message = message
+
+    return json.NewEncoder(p.RespWriter).Encode(response)
 }
 
 func (p Performer) OkVideoResponse(message string, data *Video) error {
-    return json.NewEncoder(p.RespWriter).Encode(&VideoResponse{
-        Status: "OK",
-        Message: message,
-        Data: data,
-    })
+    response := &VideoResponse{}
+    response.Status = "OK"
+    response.Message = message
+    response.Data = data
+
+    return json.NewEncoder(p.RespWriter).Encode(response)
 }
 
 func (p Performer) OkVideosResponse(message string, data *Videos) error {
-    return json.NewEncoder(p.RespWriter).Encode(&VideosResponse{
-        Status: "OK",
-        Message: message,
-        Data: data,
-    })
+    response := &VideosResponse{}
+    response.Status = "OK"
+    response.Message = message
+    response.Data = data
+
+    return json.NewEncoder(p.RespWriter).Encode(response)
 }
 
 func (p Performer) OkCategoryResponse(message string, data *Category) error {
-    return json.NewEncoder(p.RespWriter).Encode(&CategoryResponse{
-        Status: "OK",
-        Message: message,
-        Data: data,
-    })
+    response := &CategoryResponse{}
+    response.Status = "OK"
+    response.Message = message
+    response.Data = data
+
+    return json.NewEncoder(p.RespWriter).Encode(response)
 }
 
 func (p Performer) OkCategoriesResponse(message string,
   data *Categories) error {
-    return json.NewEncoder(p.RespWriter).Encode(&CategoriesResponse{
-        Status: "OK",
-        Message: message,
-        Data: data,
-    })
+    response := &CategoriesResponse{}
+    response.Status = "OK"
+    response.Message = message
+    response.Data = data
+
+    return json.NewEncoder(p.RespWriter).Encode(response)
 }
