@@ -9,6 +9,7 @@ import (
 type Performer struct {
     KeyPrefix string
     Redis *redis.Client
+    DbSize int64
     RespWriter http.ResponseWriter
     Request *http.Request
 }

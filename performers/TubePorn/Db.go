@@ -171,3 +171,74 @@ func (p Performer) DbGetVideoSearch(kword string, start_pos int,
 
     return videos.Range(start_pos, end_pos), nil
 }
+
+func (p Performer) DbAddVideo(video *Video) error {
+    video_json, err := json.Marshal(video)
+
+    if err != nil {
+        return err
+    }
+
+    p.DbSize = p.DbSize + int64(1)
+
+    err = p.Redis.ZAdd(p.RKey("videos"), redis.Z{
+        Score: float64(p.DbSize),
+        Member: video_json,
+    }).Err()
+
+    p.DbSize = p.DbSize + int64(1)
+
+    video_key := p.RKey(fmt.Sprintf("video:%s", video.SeoTitle))
+    err = p.Redis.Set(video_key, video_json, 0).Err()
+
+    if err != nil {
+        return err
+    }
+
+    for i:=0; i<video.Categories.Length(); i++ {
+        err := p.DbAddCategory(video.Categories[i])
+
+        if err != nil {
+            return err
+        }
+
+        cat_vids_key := p.RKey(fmt.Sprintf(
+            "category:%s:videos", video.Categories[i].SeoTitle))
+
+        p.DbSize = p.DbSize + int64(1)
+
+        err = p.Redis.ZAdd(cat_vids_key, redis.Z{
+            Score: float64(p.DbSize),
+            Member: video_json,
+        }).Err()
+
+        if err != nil {
+            return err
+        }
+
+    }
+
+    return nil
+}
+
+func (p Performer) DbAddCategory(category *Category) error {
+    category_json, err := json.Marshal(category)
+
+    p.DbSize = p.DbSize + int64(1)
+
+    err = p.Redis.ZAdd(p.RKey("categories"), redis.Z{
+        Score: float64(p.DbSize),
+        Member: category_json,
+    }).Err()
+
+    p.DbSize = p.DbSize + int64(1)
+
+    category_key := p.RKey(fmt.Sprintf("category:%s", category.SeoTitle))
+    err = p.Redis.Set(category_key, category_json, 0).Err()
+
+    if err != nil {
+        return err
+    }
+
+    return nil
+}

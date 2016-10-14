@@ -5,11 +5,14 @@ import (
     "strconv"
     "regexp"
     "strings"
+    "encoding/json"
 
     "gopkg.in/redis.v4"
 )
 
 func (p Performer) Do(params []string) error {
+    var err error
+
     if len(params) < 2 {
         return p.ErrorResponse("No method specified")
     }
@@ -20,6 +23,12 @@ func (p Performer) Do(params []string) error {
         DB: 0,
     })
 
+    p.DbSize, err = p.Redis.DbSize().Result()
+
+    if err != nil {
+        return p.ErrorResponse("DBSIZE error")
+    }
+
     request_method := string(p.Request.Method)
     switch params[1] {
         case "video":
@@ -28,7 +37,7 @@ func (p Performer) Do(params []string) error {
             }
 
             if request_method == "POST" {
-                return p.AddVideo(params)
+                return p.AddVideo()
             }
 
         case "videos":
@@ -74,7 +83,22 @@ func (p Performer) GetVideo(params []string) error {
     return p.OkVideoResponse("Video fetched", video)
 }
 
-func (p Performer) AddVideo(params []string) error {
+func (p Performer) AddVideo() error {
+    video := &Video{}
+    decoder := json.NewDecoder(p.Request.Body)
+
+    err := decoder.Decode(&video)
+
+    if err != nil {
+        return p.ErrorResponse("Invalid video data")
+    }
+
+    err = p.DbAddVideo(video)
+
+    if err != nil {
+        return p.ErrorResponse("Could not add video")
+    }
+
     return p.OkResponse("Added Video")
 }
 

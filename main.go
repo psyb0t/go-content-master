@@ -19,7 +19,8 @@ func init() {
 }
 
 func perform(w http.ResponseWriter, r *http.Request) {
-    log.Printf("%s %s", strings.Split(r.RemoteAddr, ":")[0], r.URL.Path)
+    log.Printf("%s [%s] %s", strings.Split(r.RemoteAddr, ":")[0],
+        string(r.Method), r.URL.Path)
 
     w.Header().Set("Content-Type", "application/json")
 
