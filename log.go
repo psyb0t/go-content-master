@@ -16,7 +16,7 @@ func OpenLogFile() *os.File {
         log.Fatal(err)
     }
 
-    f, err := os.OpenFile(log_file, os.O_APPEND, 0644)
+    f, err := os.OpenFile(log_file, os.O_RDWR | os.O_APPEND, 0644)
 
 
     if err != nil {
