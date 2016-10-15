@@ -2,6 +2,7 @@ package main
 
 import (
     "os"
+    "io"
     "log"
 
     "github.com/psyb0t/go-sfo"
@@ -9,7 +10,7 @@ import (
 
 var log_file = "/var/log/content-master/content-master.log"
 
-func OpenLogFile() *os.File {
+func Log(item interface{}, fatal bool) {
     err := sfo.CreateFile(&log_file)
 
     if err != nil {
@@ -17,11 +18,18 @@ func OpenLogFile() *os.File {
     }
 
     f, err := os.OpenFile(log_file, os.O_RDWR | os.O_APPEND, 0644)
+    defer f.Close()
 
 
     if err != nil {
         log.Fatal(err)
     }
 
-    return f
+    log.SetOutput(io.MultiWriter(os.Stdout, f))
+
+    if fatal {
+        log.Fatal(item)
+    }
+
+    log.Println(item)
 }

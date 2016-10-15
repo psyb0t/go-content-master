@@ -1,10 +1,7 @@
 package main
 
 import (
-    "os"
-    "io"
     "fmt"
-    "log"
     "strings"
     "net/http"
 
@@ -14,13 +11,13 @@ import (
 func init() {
     config = nil
     SetupConfig()
-
-    log.SetOutput(io.MultiWriter(os.Stdout, OpenLogFile()))
+    Log(fmt.Sprintf("Server started (%s:%d)",
+        config.ListenHost, config.ListenPort), false)
 }
 
 func perform(w http.ResponseWriter, r *http.Request) {
-    log.Printf("%s [%s] %s", strings.Split(r.RemoteAddr, ":")[0],
-        string(r.Method), r.URL.Path)
+    Log(fmt.Sprintf("%s [%s] %s", strings.Split(r.RemoteAddr, ":")[0],
+        string(r.Method), r.URL.Path), false)
 
     w.Header().Set("Content-Type", "application/json")
 

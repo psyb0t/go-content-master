@@ -1,7 +1,6 @@
 package main
 
 import (
-    "log"
     "encoding/json"
 
     "github.com/psyb0t/go-sfo"
@@ -35,7 +34,7 @@ func ConfigFromFile() bool {
     file, err := sfo.ReadFile(&config_file)
 
     if err != nil {
-        log.Fatal(err)
+        Log(err, true)
     }
 
     err = json.Unmarshal(file.Bytes, config)
@@ -51,7 +50,7 @@ func SaveConfig() bool {
     bytes, err := json.MarshalIndent(&config, "", "  ")
 
     if err != nil {
-        log.Fatal(err)
+        Log(err, true)
     }
 
     err = sfo.WriteBytesToFile(&config_file, &bytes)
