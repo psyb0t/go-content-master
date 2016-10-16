@@ -4,6 +4,7 @@ import (
     "fmt"
     "strings"
     "net/http"
+    "runtime/debug"
 
     "go-content-master/performers/TubePorn"
 )
@@ -16,6 +17,8 @@ func init() {
 }
 
 func perform(w http.ResponseWriter, r *http.Request) {
+    defer debug.FreeOSMemory()
+
     Log(fmt.Sprintf("%s [%s] %s", strings.Split(r.RemoteAddr, ":")[0],
         string(r.Method), r.URL.Path), false)
 
