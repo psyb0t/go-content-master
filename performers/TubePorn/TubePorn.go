@@ -7,7 +7,7 @@ import (
     "strings"
     "encoding/json"
 
-    "gopkg.in/redis.v4"
+    "github.com/garyburd/redigo/redis"
 )
 
 func (p Performer) Do(params []string) error {
@@ -17,19 +17,20 @@ func (p Performer) Do(params []string) error {
         return p.ErrorResponse("No method specified")
     }
 
-    p.Redis = redis.NewClient(&redis.Options{
-        Addr: "127.0.0.1:6379",
-        Password: "",
-        DB: 0,
-    })
+    p.Redis = p.DBPool.Get()
+    defer p.Redis.Close()
 
-    p.DbSize, err = p.Redis.DbSize().Result()
+    if err != nil {
+        return p.ErrorResponse("Could not connect to the database")
+    }
+
+    p.DbSize, err = redis.Int(p.Redis.Do("DBSIZE"))
 
     if err != nil {
         return p.ErrorResponse("DBSIZE error")
     }
 
-    request_method := string(p.Request.Method)
+    request_method := string(p.Ctx.Method())
     switch params[1] {
         case "video":
             if request_method == "GET" {
@@ -59,6 +60,8 @@ func (p Performer) Do(params []string) error {
             return p.ErrorResponse("Invalid method")
     }
 
+    p.Redis.Close()
+
     return nil
 }
 
@@ -85,9 +88,7 @@ func (p Performer) GetVideo(params []string) error {
 
 func (p Performer) AddVideo() error {
     video := &Video{}
-    decoder := json.NewDecoder(p.Request.Body)
-
-    err := decoder.Decode(&video)
+    err := json.Unmarshal(p.Ctx.PostBody(), video)
 
     if err != nil {
         return p.ErrorResponse("Invalid video data")

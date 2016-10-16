@@ -5,11 +5,10 @@ import (
 )
 
 func (p Performer) ErrorResponse(message string) error {
-    response := &Response{}
-    response.Status = "ERROR"
-    response.Message = message
-
-    return json.NewEncoder(p.RespWriter).Encode(response)
+    return json.NewEncoder(p.Ctx).Encode(&Response{
+        Status: "ERROR",
+        Message: message,
+    })
 }
 
 func (p Performer) OkResponse(message string) error {
@@ -17,7 +16,7 @@ func (p Performer) OkResponse(message string) error {
     response.Status = "OK"
     response.Message = message
 
-    return json.NewEncoder(p.RespWriter).Encode(response)
+    return json.NewEncoder(p.Ctx).Encode(response)
 }
 
 func (p Performer) OkVideoResponse(message string, data *Video) error {
@@ -26,7 +25,7 @@ func (p Performer) OkVideoResponse(message string, data *Video) error {
     response.Message = message
     response.Data = data
 
-    return json.NewEncoder(p.RespWriter).Encode(response)
+    return json.NewEncoder(p.Ctx).Encode(response)
 }
 
 func (p Performer) OkVideosResponse(message string, data *Videos) error {
@@ -35,7 +34,7 @@ func (p Performer) OkVideosResponse(message string, data *Videos) error {
     response.Message = message
     response.Data = data
 
-    return json.NewEncoder(p.RespWriter).Encode(response)
+    return json.NewEncoder(p.Ctx).Encode(response)
 }
 
 func (p Performer) OkCategoryResponse(message string, data *Category) error {
@@ -44,7 +43,7 @@ func (p Performer) OkCategoryResponse(message string, data *Category) error {
     response.Message = message
     response.Data = data
 
-    return json.NewEncoder(p.RespWriter).Encode(response)
+    return json.NewEncoder(p.Ctx).Encode(response)
 }
 
 func (p Performer) OkCategoriesResponse(message string,
@@ -54,5 +53,5 @@ func (p Performer) OkCategoriesResponse(message string,
     response.Message = message
     response.Data = data
 
-    return json.NewEncoder(p.RespWriter).Encode(response)
+    return json.NewEncoder(p.Ctx).Encode(response)
 }

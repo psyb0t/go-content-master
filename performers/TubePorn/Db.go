@@ -4,21 +4,19 @@ import (
     "fmt"
     "encoding/json"
 
-    "gopkg.in/redis.v4"
+    "github.com/garyburd/redigo/redis"
 )
 
 func (p Performer) DbGetVideo(seo_title string, get_related bool) (*Video, error) {
     redis_key := p.RKey(fmt.Sprintf("video:%s", seo_title))
-    redis_res, err := p.Redis.Get(redis_key).Result()
+    redis_res, err := redis.Bytes(p.Redis.Do("GET", redis_key))
 
     if err != nil {
-        if err != redis.Nil {
-            return nil, err
-        }
+        return nil, err
     }
 
     video := &Video{}
-    err = json.Unmarshal([]byte(redis_res), &video)
+    err = json.Unmarshal(redis_res, &video)
 
     if err != nil {
         return nil, err
@@ -41,19 +39,17 @@ func (p Performer) DbGetVideo(seo_title string, get_related bool) (*Video, error
 }
 
 func (p Performer) DbGetVideos(start_pos int, end_pos int) (*Videos, error) {
-    redis_res, err := p.Redis.ZRevRange(p.RKey("videos"),
-        int64(start_pos), int64(end_pos)).Result()
+    redis_res, err := redis.ByteSlices(p.Redis.Do("ZREVRANGE",
+        p.RKey("videos"), start_pos, end_pos))
 
     if err != nil {
-        if err != redis.Nil {
-            return nil, err
-        }
+        return nil, err
     }
 
     videos := &Videos{}
     for _, video_raw := range redis_res {
         video := &Video{}
-        err = json.Unmarshal([]byte(video_raw), &video)
+        err = json.Unmarshal(video_raw, &video)
 
         if err != nil {
             continue
@@ -66,18 +62,16 @@ func (p Performer) DbGetVideos(start_pos int, end_pos int) (*Videos, error) {
 }
 
 func (p Performer) DbGetCategory(seo_title string) (*Category, error) {
-    redis_res, err := p.Redis.Get(p.RKey(
-        fmt.Sprintf("category:%s", seo_title))).Result()
+    redis_res, err := redis.Bytes(p.Redis.Do("GET", p.RKey(
+        fmt.Sprintf("category:%s", seo_title))))
 
     if err != nil {
-        if err != redis.Nil {
-            return nil, err
-        }
+        return nil, err
     }
 
     category := &Category{}
 
-    err = json.Unmarshal([]byte(redis_res), &category)
+    err = json.Unmarshal(redis_res, &category)
 
     if err != nil {
         return nil, err
@@ -88,20 +82,18 @@ func (p Performer) DbGetCategory(seo_title string) (*Category, error) {
 
 func (p Performer) DbGetCategoryVideos(seo_title string,
   start_pos int, end_pos int) (*Videos, error) {
-    redis_res, err := p.Redis.ZRevRange(p.RKey(
-        fmt.Sprintf("category:%s:videos", seo_title)),
-        int64(start_pos), int64(end_pos)).Result()
+    redis_res, err := redis.ByteSlices(p.Redis.Do("ZREVRANGE",
+        p.RKey(fmt.Sprintf("category:%s:videos", seo_title)),
+        start_pos, end_pos))
 
     if err != nil {
-        if err != redis.Nil {
-            return nil, err
-        }
+        return nil, err
     }
 
     videos := &Videos{}
     for _, video_raw := range redis_res {
         video := &Video{}
-        err = json.Unmarshal([]byte(video_raw), &video)
+        err = json.Unmarshal(video_raw, &video)
 
         if err != nil {
             continue
@@ -114,18 +106,17 @@ func (p Performer) DbGetCategoryVideos(seo_title string,
 }
 
 func (p Performer) DbGetCategories() (*Categories, error) {
-    redis_resp, err := p.Redis.ZRevRange(p.RKey("categories"), 0, -1).Result()
+    redis_resp, err := redis.ByteSlices(p.Redis.Do(
+        "ZREVRANGE", p.RKey("categories"), 0, -1))
 
     if err != nil {
-        if err != redis.Nil {
-            return nil, err
-        }
+        return nil, err
     }
 
     categories := &Categories{}
     for _, category_raw := range redis_resp {
         category := &Category{}
-        err = json.Unmarshal([]byte(category_raw), &category)
+        err = json.Unmarshal(category_raw, &category)
 
         if err != nil {
             continue
@@ -139,28 +130,24 @@ func (p Performer) DbGetCategories() (*Categories, error) {
 
 func (p Performer) DbGetVideoSearch(kword string, start_pos int,
   end_pos int) (*Videos, error) {
-    redis_res, err := p.Redis.Keys(p.RKey(
-        fmt.Sprintf("video:*%s*", kword))).Result()
+    redis_res, err := redis.String(p.Redis.Do(
+        "KEYS", p.RKey(fmt.Sprintf("video:*%s*", kword))))
 
     if err != nil {
-        if err != redis.Nil {
-            return nil, err
-        }
+        return nil, err
     }
 
     videos := &Videos{}
     for _, video_key := range redis_res {
         video := &Video{}
 
-        video_raw, err := p.Redis.Get(video_key).Result()
+        video_raw, err := redis.Bytes(p.Redis.Do("GET", video_key))
 
         if err != nil {
-            if err != redis.Nil {
-                return nil, err
-            }
+            continue
         }
 
-        err = json.Unmarshal([]byte(video_raw), &video)
+        err = json.Unmarshal(video_raw, &video)
 
         if err != nil {
             continue
@@ -179,17 +166,15 @@ func (p Performer) DbAddVideo(video *Video) error {
         return err
     }
 
-    p.DbSize = p.DbSize + int64(1)
+    p.DbSize = p.DbSize + 1
 
-    err = p.Redis.ZAdd(p.RKey("videos"), redis.Z{
-        Score: float64(p.DbSize),
-        Member: video_json,
-    }).Err()
+    _, err = p.Redis.Do("ZADD", p.RKey("videos"),
+        float64(p.DbSize), video_json)
 
-    p.DbSize = p.DbSize + int64(1)
+    p.DbSize = p.DbSize + 1
 
     video_key := p.RKey(fmt.Sprintf("video:%s", video.SeoTitle))
-    err = p.Redis.Set(video_key, video_json, 0).Err()
+    _, err = p.Redis.Do("SET", video_key, video_json)
 
     if err != nil {
         return err
@@ -205,12 +190,10 @@ func (p Performer) DbAddVideo(video *Video) error {
         cat_vids_key := p.RKey(fmt.Sprintf(
             "category:%s:videos", video.Categories[i].SeoTitle))
 
-        p.DbSize = p.DbSize + int64(1)
+        p.DbSize = p.DbSize + 1
 
-        err = p.Redis.ZAdd(cat_vids_key, redis.Z{
-            Score: float64(p.DbSize),
-            Member: video_json,
-        }).Err()
+        _, err = p.Redis.Do("ZADD", cat_vids_key,
+            float64(p.DbSize), video_json)
 
         if err != nil {
             return err
@@ -224,17 +207,14 @@ func (p Performer) DbAddVideo(video *Video) error {
 func (p Performer) DbAddCategory(category *Category) error {
     category_json, err := json.Marshal(category)
 
-    p.DbSize = p.DbSize + int64(1)
+    p.DbSize = p.DbSize + 1
 
-    err = p.Redis.ZAdd(p.RKey("categories"), redis.Z{
-        Score: float64(p.DbSize),
-        Member: category_json,
-    }).Err()
+    _, err = p.Redis.Do("ZADD", p.RKey("categories"), p.DbSize, category_json)
 
-    p.DbSize = p.DbSize + int64(1)
+    p.DbSize = p.DbSize + 1
 
     category_key := p.RKey(fmt.Sprintf("category:%s", category.SeoTitle))
-    err = p.Redis.Set(category_key, category_json, 0).Err()
+    _, err = p.Redis.Do("SET", category_key, category_json)
 
     if err != nil {
         return err

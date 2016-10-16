@@ -1,17 +1,18 @@
 package TubePorn
 
 import (
-    "net/http"
     "math/rand"
-    "gopkg.in/redis.v4"
+
+    "github.com/garyburd/redigo/redis"
+    "github.com/valyala/fasthttp"
 )
 
 type Performer struct {
     KeyPrefix string
-    Redis *redis.Client
-    DbSize int64
-    RespWriter http.ResponseWriter
-    Request *http.Request
+    DBPool *redis.Pool
+    Redis redis.Conn
+    DbSize int
+    Ctx *fasthttp.RequestCtx
 }
 
 type Category struct {
