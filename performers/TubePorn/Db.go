@@ -130,7 +130,7 @@ func (p Performer) DbGetCategories() (*Categories, error) {
 
 func (p Performer) DbGetVideoSearch(kword string, start_pos int,
   end_pos int) (*Videos, error) {
-    redis_res, err := redis.String(p.Redis.Do(
+    redis_res, err := redis.ByteSlices(p.Redis.Do(
         "KEYS", p.RKey(fmt.Sprintf("video:*%s*", kword))))
 
     if err != nil {
@@ -141,7 +141,7 @@ func (p Performer) DbGetVideoSearch(kword string, start_pos int,
     for _, video_key := range redis_res {
         video := &Video{}
 
-        video_raw, err := redis.Bytes(p.Redis.Do("GET", video_key))
+        video_raw, err := redis.Bytes(p.Redis.Do("GET", string(video_key)))
 
         if err != nil {
             continue
