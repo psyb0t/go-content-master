@@ -2,6 +2,7 @@ package TubePorn
 
 import (
     "fmt"
+    "errors"
     "encoding/json"
 
     "github.com/garyburd/redigo/redis"
@@ -164,6 +165,12 @@ func (p Performer) DbAddVideo(video *Video) error {
 
     if err != nil {
         return err
+    }
+
+    _, err = p.DbGetVideo(video.SeoTitle, false)
+
+    if err == nil {
+        return errors.New("Video already exists")
     }
 
     p.DbSize = p.DbSize + 1
