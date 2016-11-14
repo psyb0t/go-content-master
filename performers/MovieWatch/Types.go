@@ -1,4 +1,4 @@
-package TubePorn
+package MovieWatch
 
 import (
     "math/rand"
@@ -9,6 +9,7 @@ import (
 
 type Performer struct {
     Ctx *fasthttp.RequestCtx
+    FDBGenres *fdb.Collection
     FDBVideos *fdb.Collection
     FDBCategories *fdb.Collection
     FDBCategoryVideos *fdb.Collection
@@ -29,6 +30,7 @@ func (c Categories) Rand() *Category {
 }
 
 type Video struct {
+    Id string `json:"id"`
     SiteId string `json:"site_id"`
     Title string `json:"title"`
     SeoTitle string `json:"seo_title"`
