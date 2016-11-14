@@ -28,21 +28,21 @@ func init() {
     TubePornFDB = make(map[string]*fdb.Collection)
 
     TubePornFDB["videos"], err = fdb.NewCollection(
-        "./db/TubePorn/Videos")
+        "/etc/fdb/TubePorn/Videos")
 
     if err != nil {
         log.Fatal("Could not create TubePorn:Videos collection")
     }
 
     TubePornFDB["categories"], err = fdb.NewCollection(
-        "./db/TubePorn/Categories")
+        "/etc/fdb/TubePorn/Categories")
 
     if err != nil {
         log.Fatal("Could not create TubePorn:Categories collection")
     }
 
     TubePornFDB["category_videos"], err = fdb.NewCollection(
-        "./db/TubePorn/CategoryVideos")
+        "/etc/fdb/TubePorn/CategoryVideos")
 
     if err != nil {
         log.Fatal("Could not create TubePorn:Categories collection")
@@ -51,14 +51,14 @@ func init() {
     MovieWatchFDB = make(map[string]*fdb.Collection)
 
     MovieWatchFDB["videos"], err = fdb.NewCollection(
-        "./db/MovieWatch/Videos")
+        "/etc/fdb/MovieWatch/Videos")
 
     if err != nil {
         log.Fatal("Could not create MovieWatch:Videos collection")
     }
 
     MovieWatchFDB["genres"], err = fdb.NewCollection(
-        "./db/MovieWatch/Genres")
+        "/etc/fdb/MovieWatch/Genres")
 
     if err != nil {
         log.Fatal("Could not create MovieWatch:Genres collection")
