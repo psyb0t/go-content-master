@@ -4,9 +4,6 @@ import (
     "log"
     "fmt"
     "strings"
-    //"time"
-    //"encoding/json"
-    //"sync"
 
     "github.com/valyala/fasthttp"
     "github.com/psyb0t/go-fdb"
@@ -27,102 +24,6 @@ func init() {
     SetupConfig()
     Log(fmt.Sprintf("Server started (%s:%d)",
         config.ListenHost, config.ListenPort), false)
-
-
-    //var wg sync.WaitGroup
-    //
-    //wg.Add(1)
-    //go func (wg *sync.WaitGroup) {
-    //    rediss := redis_pool.Get()
-    //    fdb_collection, _ := fdb.NewCollection(
-    //        "./db/TubePorn/Videos")
-    //
-    //    redis_res, _ := redis.ByteSlices(rediss.Do("KEYS", "tubeporn_video:*"))
-    //
-    //    for _, keyname := range redis_res {
-    //        value, _ := redis.Bytes(rediss.Do("GET", keyname))
-    //
-    //        keyname = []byte(strings.Replace(string(keyname), "tubeporn_video:", "", -1))
-    //
-    //        fdb_collection.Set(string(keyname), string(value))
-    //    }
-    //
-    //    fmt.Println(len(redis_res), "Videos Done")
-    //    wg.Done()
-    //}(&wg)
-    //
-    //wg.Add(1)
-    //go func (wg *sync.WaitGroup) {
-    //    rediss := redis_pool.Get()
-    //    fdb_collection, _ := fdb.NewCollection(
-    //        "./db/TubePorn/Categories")
-    //
-    //    redis_res, _ := redis.ByteSlices(rediss.Do("KEYS", "tubeporn_category:*"))
-    //
-    //    for _, keyname := range redis_res {
-    //        value, _ := redis.Bytes(rediss.Do("GET", keyname))
-    //
-    //        if strings.Contains(string(keyname), ":videos") {
-    //            continue
-    //        }
-    //
-    //        keyname = []byte(strings.Replace(string(keyname), "tubeporn_category:", "", -1))
-    //
-    //        fdb_collection.Set(string(keyname), string(value))
-    //    }
-    //
-    //    fmt.Println(len(redis_res), "Categories Done")
-    //    wg.Done()
-    //}(&wg)
-    //
-    //
-    //wg.Add(1)
-    //go func (wg *sync.WaitGroup) {
-    //    rediss := redis_pool.Get()
-    //
-    //    redis_res, _ := redis.ByteSlices(rediss.Do("KEYS", "tubeporn_category:*:videos"))
-    //
-    //    fdb_collection, _ := fdb.NewCollection(
-    //        "./db/TubePorn/CategoryVideos")
-    //
-    //    for _, keyname := range redis_res {
-    //        catname := strings.Replace(
-    //            strings.Replace(string(keyname), "tubeporn_category:", "", -1),
-    //            ":videos", "", -1)
-    //
-    //        vid_raws, _ := redis.ByteSlices(rediss.Do("ZRANGE", keyname, 0, -1))
-    //
-    //        vid_list := []string{}
-    //        for _, video_raw := range vid_raws {
-    //            video := &TubePorn.Video{}
-    //
-    //            err = json.Unmarshal(video_raw, &video)
-    //
-    //            if err != nil {
-    //                continue
-    //            }
-    //
-    //            vid_list = append(vid_list, video.SeoTitle)
-    //        }
-    //
-    //        vid_list_json, err := json.Marshal(vid_list)
-    //
-    //        if err != nil {
-    //            continue
-    //        }
-    //
-    //        fdb_collection.Set(catname, string(vid_list_json))
-    //    }
-    //
-    //    wg.Done()
-    //}(&wg)
-    //
-    //
-    //
-    //wg.Wait()
-    //
-    //log.Fatal("dafuq")
-
 
     TubePornFDB = make(map[string]*fdb.Collection)
 
