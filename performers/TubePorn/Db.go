@@ -114,7 +114,7 @@ func (p Performer) DbGetCategoryVideos(seo_title string,
     }
 
     if start_pos > end_pos {
-        from = end_pos
+        start_pos = end_pos
     }
 
     videos := &Videos{}
