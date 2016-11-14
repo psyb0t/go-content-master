@@ -92,7 +92,7 @@ func main() {
     go func (wg *sync.WaitGroup) {
         rediss := redis_pool.Get()
         fdb_collection, _ := fdb.NewCollection(
-            "./db/TubePorn/Videos")
+            "/etc/fdb/TubePorn/Videos")
 
         redis_res, _ := redis.ByteSlices(rediss.Do("KEYS", "tubeporn_video:*"))
 
@@ -112,7 +112,7 @@ func main() {
     go func (wg *sync.WaitGroup) {
         rediss := redis_pool.Get()
         fdb_collection, _ := fdb.NewCollection(
-            "./db/TubePorn/Categories")
+            "/etc/fdb/TubePorn/Categories")
 
         redis_res, _ := redis.ByteSlices(rediss.Do("KEYS", "tubeporn_category:*"))
 
@@ -140,7 +140,7 @@ func main() {
         redis_res, _ := redis.ByteSlices(rediss.Do("KEYS", "tubeporn_category:*:videos"))
 
         fdb_collection, _ := fdb.NewCollection(
-            "./db/TubePorn/CategoryVideos")
+            "/etc/fdb/TubePorn/CategoryVideos")
 
         for _, keyname := range redis_res {
             catname := strings.Replace(

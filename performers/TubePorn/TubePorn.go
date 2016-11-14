@@ -2,7 +2,6 @@ package TubePorn
 
 import (
     "strconv"
-    "fmt"
     "regexp"
     "strings"
     "encoding/json"
@@ -25,7 +24,6 @@ func (p Performer) Do(params []string) error {
             }
 
         case "videos":
-            fmt.Println(p.FDBVideos.Keys[len(p.FDBVideos.Keys)-1])
             return p.GetVideos(params)
 
         case "category":
