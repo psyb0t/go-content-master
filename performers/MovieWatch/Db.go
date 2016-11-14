@@ -1,4 +1,4 @@
-package TubePorn
+package MovieWatch
 
 import (
     "errors"
@@ -109,14 +109,6 @@ func (p Performer) DbGetCategoryVideos(seo_title string,
         return nil, err
     }
 
-    if len(vid_res) < end_pos {
-        end_pos = len(vid_res)
-    }
-
-    if start_pos > end_pos {
-        start_pos = end_pos
-    }
-
     videos := &Videos{}
     for _, video_seo_title := range vid_res[start_pos:end_pos] {
         video := &Video{}
@@ -170,14 +162,6 @@ func (p Performer) DbGetVideoSearch(kword string, start_pos int,
 
     if err != nil {
         return nil, err
-    }
-
-    if len(fdb_res) < end_pos {
-        end_pos = len(fdb_res)
-    }
-
-    if start_pos > end_pos {
-        start_pos = end_pos
     }
 
     videos := &Videos{}

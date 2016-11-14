@@ -4,8 +4,6 @@
 
 Go - https://golang.org/doc/install
 
-Redis - http://redis.io/topics/quickstart
-
 ## Installation
 
 ```

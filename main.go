@@ -1,41 +1,68 @@
 package main
 
 import (
+    "log"
     "fmt"
     "strings"
-    "time"
 
     "github.com/valyala/fasthttp"
-    "github.com/garyburd/redigo/redis"
+    "github.com/psyb0t/go-fdb"
+
     "go-content-master/performers/TubePorn"
+    "go-content-master/performers/MovieWatch"
 )
 
-var redis_pool = &redis.Pool{
-    MaxIdle: 3,
-    IdleTimeout: 240 * time.Second,
-    Dial: func () (redis.Conn, error) {
-        c, err := redis.Dial("tcp", "127.0.0.1:6379")
+var err error
 
-        if err != nil {
-            return nil, err
-        }
-
-        return c, err
-    },
-    TestOnBorrow: func(c redis.Conn, t time.Time) error {
-        if time.Since(t) < time.Minute {
-            return nil
-        }
-        _, err := c.Do("PING")
-        return err
-    },
-}
+var (
+    TubePornFDB map[string]*fdb.Collection
+    MovieWatchFDB map[string]*fdb.Collection
+)
 
 func init() {
     config = nil
     SetupConfig()
     Log(fmt.Sprintf("Server started (%s:%d)",
         config.ListenHost, config.ListenPort), false)
+
+    TubePornFDB = make(map[string]*fdb.Collection)
+
+    TubePornFDB["videos"], err = fdb.NewCollection(
+        "/etc/fdb/TubePorn/Videos")
+
+    if err != nil {
+        log.Fatal("Could not create TubePorn:Videos collection")
+    }
+
+    TubePornFDB["categories"], err = fdb.NewCollection(
+        "/etc/fdb/TubePorn/Categories")
+
+    if err != nil {
+        log.Fatal("Could not create TubePorn:Categories collection")
+    }
+
+    TubePornFDB["category_videos"], err = fdb.NewCollection(
+        "/etc/fdb/TubePorn/CategoryVideos")
+
+    if err != nil {
+        log.Fatal("Could not create TubePorn:Categories collection")
+    }
+
+    MovieWatchFDB = make(map[string]*fdb.Collection)
+
+    MovieWatchFDB["videos"], err = fdb.NewCollection(
+        "/etc/fdb/MovieWatch/Videos")
+
+    if err != nil {
+        log.Fatal("Could not create MovieWatch:Videos collection")
+    }
+
+    MovieWatchFDB["genres"], err = fdb.NewCollection(
+        "/etc/fdb/MovieWatch/Genres")
+
+    if err != nil {
+        log.Fatal("Could not create MovieWatch:Genres collection")
+    }
 }
 
 func perform(ctx *fasthttp.RequestCtx) {
@@ -55,15 +82,28 @@ func perform(ctx *fasthttp.RequestCtx) {
     switch params[0] {
         case "tubeporn":
             performer := &TubePorn.Performer{
-                KeyPrefix: "tubeporn",
-                DBPool: redis_pool,
                 Ctx: ctx,
+                FDBVideos: TubePornFDB["videos"],
+                FDBCategories: TubePornFDB["categories"],
+                FDBCategoryVideos: TubePornFDB["category_videos"],
+            }
+
+            performer.Do(params)
+            break
+
+        case "moviewatch":
+            performer := &MovieWatch.Performer{
+                Ctx: ctx,
+                FDBVideos: MovieWatchFDB["videos"],
+                FDBGenres: MovieWatchFDB["genres"],
             }
 
             performer.Do(params)
             break
     }
 }
+
+
 
 func main() {
     fasthttp.ListenAndServe(fmt.Sprintf("%s:%d", config.ListenHost,
