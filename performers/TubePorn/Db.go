@@ -109,6 +109,14 @@ func (p Performer) DbGetCategoryVideos(seo_title string,
         return nil, err
     }
 
+    if len(vid_res) < end_pos {
+        end_pos = len(vid_res)
+    }
+
+    if start_pos > end_pos {
+        from = end_pos
+    }
+
     videos := &Videos{}
     for _, video_seo_title := range vid_res[start_pos:end_pos] {
         video := &Video{}
