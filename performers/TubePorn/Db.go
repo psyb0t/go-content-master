@@ -172,6 +172,14 @@ func (p Performer) DbGetVideoSearch(kword string, start_pos int,
         return nil, err
     }
 
+    if len(fdb_res) < end_pos {
+        end_pos = len(fdb_res)
+    }
+
+    if start_pos > end_pos {
+        start_pos = end_pos
+    }
+
     videos := &Videos{}
     for _, video_raw := range fdb_res {
         video := &Video{}
